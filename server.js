@@ -4,10 +4,12 @@ import dotenv from "dotenv";
 import userRouter from "./authentication/authRoute.js";
 import chatRouter from "./chats/chatRoute.js";
 import doctorRouter from "./doctors/doctorRoute.js";
+import morgan from "morgan";
 dotenv.config();
 
 const app = express();
 
+app.use(morgan("dev"));
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://yourdomain.com"],
