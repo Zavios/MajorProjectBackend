@@ -2,9 +2,22 @@ import supabase from "../db/supabase.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const user_id = req.user_id;
+    const { username, dob, gender, email, password } = req.body;
+    const { data: user, error: userError } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+    console.log(user);
+    const user_id = user.user.id;
+    console.log(user_id);
+    if (userError) {
+      return res.status(400).json({ success: false, error: userError.message });
+    }
     const { data, error } = await supabase.from("profiles").insert({
       id: user_id,
+      username: username,
+      dob: new Date(dob),
+      gender: gender,
     });
     if (error) {
       return res.status(400).json({ success: false, error: error.message });
@@ -46,6 +59,15 @@ export const loginUser = async (req, res) => {
     });
     if (error) {
       return res.status(400).json({ success: false, error: error.message });
+    }
+    const { data: username, error: usernameError } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", data.user.id)
+      .single();
+    console.log(username);
+    if (usernameError) {
+      console.log("er");
     }
     return res.status(200).json({
       success: true,
@@ -128,6 +150,25 @@ export const verifyUser = async (req, res) => {
     return res.status(200).json({ success: true, user: user });
   } catch (error) {
     console.error("Error verifying user:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+};
+
+const initialSetup = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "signup",
+      email: email,
+    });
+    if (error) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
+    return res.status(200).json({ success: true, data: data });
+  } catch (error) {
+    console.error("Error logging out user:", error);
     return res
       .status(500)
       .json({ success: false, error: "Internal server error" });

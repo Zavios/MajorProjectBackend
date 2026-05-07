@@ -28,13 +28,35 @@ export const getPendingChats = async (req, res) => {
     const user_id = req.user_id;
     const { data, error } = await supabase
       .from("chats")
-      .select("*")
+      .select(
+        `
+    id,
+    created_at,
+    image_url,
+    patient_note,
+    title,
+    prediction,
+    confidence_score,
+    doctor_id,
+    is_approved,
+    time_approved,
+    doctor_note,
+    profiles (
+      id,
+      username,
+      created_at,
+      dob,
+      gender
+    )
+  `,
+      )
       .eq("is_approved", false)
       .order("created_at", { ascending: false })
       .limit(1);
     if (error) {
       return res.status(400).json({ success: false, error: error.message });
     }
+    console.log(data);
     return res.status(200).json({
       success: true,
       message: "Pending chats fetched successfully",
@@ -82,7 +104,28 @@ export const getApprovedChats = async (req, res) => {
     console.log("user_id", user_id);
     const { data, error } = await supabase
       .from("chats")
-      .select("*")
+      .select(
+        `
+    id,
+    created_at,
+    image_url,
+    patient_note,
+    title,
+    prediction,
+    confidence_score,
+    doctor_id,
+    is_approved,
+    time_approved,
+    doctor_note,
+    profiles (
+      id,
+      username,
+      created_at,
+      dob,
+      gender
+    )
+  `,
+      )
       .eq("is_approved", true)
       .eq("doctor_id", user_id);
     if (error) {
@@ -107,12 +150,34 @@ export const requestRecord = async (req, res) => {
     // const { chat_id } = req.body;
     const { data, error } = await supabase
       .from("chats")
+      .select(
+        `
+    id,
+    created_at,
+    image_url,
+    patient_note,
+    title,
+    prediction,
+    confidence_score,
+    doctor_id,
+    is_approved,
+    time_approved,
+    doctor_note,
+    profiles (
+      id,
+      username,
+      created_at,
+      dob,
+      gender
+    )
+  `,
+      )
       .eq("is_approved", false)
-      .order("created_at", { ascending: false })
-      .select();
+      .order("created_at", { ascending: false });
     if (error) {
       return res.status(400).json({ success: false, error: error.message });
     }
+    console.log(data);
     return res.status(200).json({
       success: true,
       chat: data,
